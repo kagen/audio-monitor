@@ -55,3 +55,33 @@ pip install -r requirements.txt
 ## License
 
 MIT
+
+
+## Build Standalone EXE
+
+### Option 1: Local Build (Windows)
+
+```bash
+# Install PyInstaller
+pip install pyinstaller
+
+# Build
+python build.py
+```
+
+Output: `dist/AudioMonitor.exe`
+
+### Option 2: GitHub Actions (Automatic)
+
+Every push to `main` branch automatically builds and uploads the EXE as a GitHub Release.
+
+To trigger manually:
+- Go to **Actions** tab in your GitHub repo
+- Select **Build Windows EXE**
+- Click **Run workflow**
+
+### Option 3: Advanced (spec file)
+
+```bash
+pyinstaller AudioMonitor.spec
+```
