@@ -1,0 +1,6 @@
+numpy>=1.24.0
+scipy>=1.10.0
+matplotlib>=3.7.0
+PyAudioWPatch>=0.2.12.5
+win10toast>=0.9; platform_system=="Windows"
+librosa>=0.10.0; platform_system=="Windows"
