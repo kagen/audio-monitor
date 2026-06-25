@@ -3,8 +3,6 @@ name: Build Windows EXE
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -28,23 +26,44 @@ jobs:
 
       - name: Build EXE with PyInstaller
         run: |
-          python build.py
+          pyinstaller --name AudioMonitor `
+            --onefile `
+            --windowed `
+            --noconfirm `
+            --clean `
+            --hidden-import pyaudiowpatch `
+            --hidden-import scipy.signal `
+            --hidden-import scipy.io.wavfile `
+            --hidden-import scipy.spatial.distance `
+            --hidden-import numpy `
+            --hidden-import matplotlib.backends.backend_tkagg `
+            --add-data "assets;assets" `
+            main.py
+
+      - name: Verify build output
+        run: |
+          if (Test-Path "dist/AudioMonitor.exe") {
+            Write-Host "[OK] Build successful"
+            $size = (Get-Item "dist/AudioMonitor.exe").Length / 1MB
+            Write-Host ("   Size: {0:N1} MB" -f $size)
+          } else {
+            Write-Host "[ERROR] Build failed - dist/AudioMonitor.exe not found"
+            Get-ChildItem dist/ -ErrorAction SilentlyContinue
+            exit 1
+          }
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: AudioMonitor-Windows
-          path: |
-            dist/AudioMonitor.exe
-            dist/reference.wav
+          path: dist/AudioMonitor.exe
 
-      - name: Create Release (on push to main)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - name: Create Release
+        if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ github.run_number }}
           name: Release v${{ github.run_number }}
-          files: |
-            dist/AudioMonitor.exe
+          files: dist/AudioMonitor.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
